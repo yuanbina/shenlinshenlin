@@ -1,34 +1,182 @@
-<!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="UTF-8">
-    <title>Shenlinshenlin by yuanbina</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Shenlinshenlin</h1>
-      <h2 class="project-tagline">个人简介</h2>
-      <a href="https://github.com/yuanbina/shenlinshenlin" class="btn">View on GitHub</a>
-      <a href="https://github.com/yuanbina/shenlinshenlin/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/yuanbina/shenlinshenlin/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="shenlinshenlin" />
+<meta name="copyright" content="shenlinshenlin" />
+<meta name="description" content="shenlinshenlin" />
+<title>shenlinshenlin</title>
+<style>
+*{ margin:0; padding:0; list-style:none;}
+body{ text-align:center;}
+#ul1{ width:510px; margin:10px auto; position:relative;}
+#ul1 li{ width:150px; height:150px; margin:10px; float:left;}
+.box{ border:5px dashed #f60;}
+h1,h2{
+	margin:0 auto;
+	text-align: center;
+	color:red;
+}
+</style>
+<script src="move.js"></script>
+<script>
+window.onload=function(){
+	var oUl=document.getElementById('ul1');
+	var aLi=oUl.children;
+	var oBtn=document.getElementById('btn1');
+	
+	
+	var zIndex=20;
+	//布局转化
+	var aPos=[];
+	
+	//点击随机换
+	oBtn.onclick=function(){
+		aPos.sort(function(){
+			return Math.random()-0.5;	
+		});
+		
+		for(var i=0; i<aLi.length; i++){
+			startMove(aLi[i],aPos[aLi[i].index]);
+		}
+	};
+	
+	for(var i=0; i<aLi.length; i++){
+		aPos[i]={left:aLi[i].offsetLeft, top:aLi[i].offsetTop};
+	}
+	for(var i=0; i<aLi.length; i++){
+		aLi[i].style.left=aPos[i].left+'px';
+		aLi[i].style.top=aPos[i].top+'px';
+		aLi[i].style.position='absolute';
+		aLi[i].style.margin=0;
+	}
+	
+	//拖拽
+	for(var i=0; i<aLi.length; i++){
+		drag(aLi[i]);
+		aLi[i].index=i;
+	}
+	
+	function drag(oDiv){
+		oDiv.onmousedown=function(ev){
+			var oEvent=ev || event;
+			
+			var disX=oEvent.clientX-oDiv.offsetLeft;
+			var disY=oEvent.clientY-oDiv.offsetTop;
+			
+			oDiv.style.zIndex=zIndex++;
+			clearInterval(oDiv.timer);
+			
+			document.onmousemove=function(ev){
+				var oEvent=ev || event;
+				
+				oDiv.style.left=oEvent.clientX-disX+'px';
+				oDiv.style.top=oEvent.clientY-disY+'px';	
+				
+				for(var i=0; i<aLi.length; i++){
+					aLi[i].className='';
+				}
+				//检测碰撞
+				var oNear=findNearest(oDiv);
+				if(oNear){
+					oNear.className='box';	
+				}
+			}
+			document.onmouseup=function(){
+				document.onmousemove=null;
+				document.onmouseup=null;	
+				oDiv.releaseCapture && oDiv.releaseCapture();
+				
+				//换位置
+				var oNear=findNearest(oDiv);
+				if(oNear){
+					//oDiv->oNear
+					//oNear->oDiv
+					startMove(oNear,aPos[oDiv.index]);
+					startMove(oDiv,aPos[oNear.index]);
+					
+					oNear.className='';
+					
+					//oDiv.index  oNear.index
+					var tmp;
+					tmp=oDiv.index;
+					oDiv.index=oNear.index;
+					oNear.index=tmp;
+				}else{
+					startMove(oDiv,aPos[oDiv.index]);
+				}
+			}
+			oDiv.setCapture && oDiv.setCapture();
+			return false;	
+		}
+	}
+	
+	function findNearest(obj){
+		var iMin=new Date().getTime();
+		var iMinIndex=-1;
+		for(var i=0; i<aLi.length; i++){
+			if(obj==aLi[i])continue;
+			if(collTest(obj,aLi[i])){
+				var dis=getDis(obj,aLi[i]);
+				if(dis<iMin){
+					iMin=dis;	
+					iMinIndex=i;
+				}	
+			}
+		}
+		
+		if(iMinIndex==-1){
+			return null;
+		}else{
+			return aLi[iMinIndex];	
+		}
+	}
+	
+	
+	//碰撞检测函数
+	function collTest(obj,obj2){
+		var l1=obj.offsetLeft;
+		var r1=obj.offsetLeft+obj.offsetWidth;
+		var t1=obj.offsetTop;
+		var b1=obj.offsetTop+obj.offsetHeight;
+		
+		var l2=obj2.offsetLeft;
+		var r2=obj2.offsetLeft+obj2.offsetWidth;
+		var t2=obj2.offsetTop;
+		var b2=obj2.offsetTop+obj2.offsetHeight;
+		
+		if(r1<l2 || l1>r2 || b1<t2 || t1>b2){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+	function getDis(obj,obj2){
+		var a=obj.offsetLeft-obj2.offsetLeft;
+		var b=obj.offsetTop-obj2.offsetTop;
+		
+		//a*a+b*b=c*c
+		return Math.sqrt(a*a+b*b);
+	}
+};
+</script>
+</head>
 
-    <section class="main-content">
-      <p>额鹅鹅鹅</p>
-
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/yuanbina/shenlinshenlin">Shenlinshenlin</a> is maintained by <a href="https://github.com/yuanbina">yuanbina</a>.</span>
-
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
-
-    </section>
-
-  
-  </body>
+<body>
+	<h1>深林小宝宝!!!!!</h1><br />
+	<h2>节日快乐哟哟哟!!!!!</h2>
+<input type="button" id="btn1" value="随机换一个">
+<ul id="ul1">
+	<li><img src="img/1.jpg" width="150" height="150"></li>
+    <li><img src="img/2.jpg" width="150" height="150"></li>
+    <li><img src="img/3.jpg" width="150" height="150"></li>
+    <li><img src="img/4.jpg" width="150" height="150"></li>
+    <li><img src="img/5.jpg" width="150" height="150"></li>
+    <li><img src="img/6.jpg" width="150" height="150"></li>
+    <li><img src="img/7.jpg" width="150" height="150"></li>
+    <li><img src="img/8.jpg" width="150" height="150"></li>
+    <li><img src="img/9.jpg" width="150" height="150"></li>
+</ul>
+</body>
 </html>
