@@ -17,7 +17,9 @@ h1,h2{
 	text-align: center;
 	color:red;
 }
-
+video{
+	margin:500px auto;
+}
 </style>
 <script src="move.js"></script>
 <script>
@@ -179,5 +181,23 @@ window.onload=function(){
     <li><img src="img/8.jpg" width="150" height="150"></li>
     <li><img src="img/9.jpg" width="150" height="150"></li>
 </ul>
+<video width="320" height="240" controls="controls" style="margin-left:0;">
+  <source src="mp4/cc.mp4" type="video/mp4" />
+  <object data="mp4/cc.mp4" width="320" height="240">
+    <embed src="mp4/cc.mp4" width="320" height="240" />
+  </object>
+</video>
+<video width="320" height="240" controls="controls">
+  <source src="mp4/school.mp4" type="video/mp4" />
+  <object data="mp4/school.mp4" width="320" height="240">
+    <embed src="mp4/school.mp4" width="320" height="240" />
+  </object>
+</video>
+<video width="320" height="240" controls="controls" style="margin-right:0;">
+  <source src="mp4/xx.mp4" type="video/mp4" />
+  <object data="mp4/xx.mp4" width="320" height="240">
+    <embed src="mp4/xx.mp4" width="320" height="240" />
+  </object>
+</video>
 </body>
 </html>
